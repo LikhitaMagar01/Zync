@@ -23,7 +23,7 @@ export default defineNuxtConfig({
       title: appName,
       titleTemplate: `%s | ${appName}`,
       link: [
-        { rel: 'icon', type: 'image/png', href: '/chat.ico', sizes: '96x96' },
+        { rel: 'icon', type: 'image/png', href: '/chatOne.ico' },
       ]
     }
   }
