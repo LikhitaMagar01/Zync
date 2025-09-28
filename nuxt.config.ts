@@ -8,7 +8,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-09-22",
   devtools: { enabled: true },
   modules: [
-    '@pinia/nuxt'
+    '@pinia/nuxt',
   ],
   vite: {
     plugins: [
@@ -26,5 +26,9 @@ export default defineNuxtConfig({
         { rel: 'icon', type: 'image/png', href: '/chatOne.ico' },
       ]
     }
-  }
+  },
+  runtimeConfig: {
+    mongodbUri: process.env.MONGODB_URI,
+    mongodbDbName: process.env.MONGODB_DB_NAME || 'zync',
+  },
 })
