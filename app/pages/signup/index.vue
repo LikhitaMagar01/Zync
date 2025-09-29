@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { useHead } from 'nuxt/app';
-import SignupPage from '../pages/signup/index.vue'
+import Signup from '../../components/sign-up/signup.vue';
 
 useHead({
-    title: 'Home'
+    title: 'Sign Up'
 })
 
 definePageMeta({
-    layout: false
+    layout: 'default'
 })
 </script>
 
 <template>
-    <SignupPage />
+    <Signup />
 </template>

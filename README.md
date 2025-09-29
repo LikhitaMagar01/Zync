@@ -2,7 +2,7 @@ It is a messaging application dedicated for instant chating, scheduled messages 
 
 # development
 1. pnpm install
-2. pnpm run dev
+2. pnpm run dev / pnpm run dev --host
 
 # production
 1. pnpm run build
