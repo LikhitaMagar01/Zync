@@ -1,16 +1,31 @@
 <script setup lang="ts">
-import { useHead } from 'nuxt/app';
-import SignupPage from '../pages/signup/index.vue'
+import { onMounted } from 'vue'
+import { useHead, navigateTo } from 'nuxt/app'
+import { useAuthStore } from '../stores/auth'
+import SignupForm from '../components/sign-up/SignupForm.vue'
+
+const authStore = useAuthStore()
 
 useHead({
     title: 'Home'
 })
 
-definePageMeta({
-    layout: false
+onMounted(async () => {
+    await authStore.checkAuthStatus()
+    if (authStore.isAuthenticated) {
+        await navigateTo('/home')
+    }
 })
 </script>
 
 <template>
-    <SignupPage />
+    <div v-if="!authStore.isAuthenticated">
+        <SignupForm />
+    </div>
+    <div v-else class="min-h-screen bg-black flex items-center justify-center">
+        <div class="text-white text-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+            <p>Redirecting to home...</p>
+        </div>
+    </div>
 </template>

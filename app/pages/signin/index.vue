@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useHead } from 'nuxt/app';
-import SignupForm from '../../components/sign-up/SignupForm.vue';
+import SigninForm from '../../components/sign-in/SIgninForm.vue';
 
 useHead({
-    title: 'Sign Up'
+    title: 'Sign In'
 })
 </script>
 
 <template>
-    <SignupForm />
+    <SigninForm />
 </template>

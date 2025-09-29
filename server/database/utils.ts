@@ -21,6 +21,11 @@ export class DatabaseService {
     return await this.db.collection(COLLECTIONS.USERS).findOne({ username })
   }
 
+  async findUserById(userId: string) {
+    const { ObjectId } = await import('mongodb')
+    return await this.db.collection(COLLECTIONS.USERS).findOne({ _id: new ObjectId(userId) })
+  }
+
   async updateUser(userId: string, updateData: any) {
     return await this.db.collection(COLLECTIONS.USERS).updateOne(
       { _id: userId as any },
