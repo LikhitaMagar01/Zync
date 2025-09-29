@@ -21,6 +21,10 @@ export class DatabaseService {
     return await this.db.collection(COLLECTIONS.USERS).findOne({ username })
   }
 
+  async findUserByGoogleId(googleId: string) {
+    return await this.db.collection(COLLECTIONS.USERS).findOne({ googleId })
+  }
+
   async findUserById(userId: string) {
     const { ObjectId } = await import('mongodb')
     return await this.db.collection(COLLECTIONS.USERS).findOne({ _id: new ObjectId(userId) })

@@ -106,7 +106,7 @@
         
         <button 
           @click="handleGoogleSignIn"
-          class="w-full py-3 sm:py-4 bg-white border border-gray-300 rounded-lg sm:rounded-xl flex items-center justify-center space-x-2 sm:space-x-3 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 transform hover:-translate-y-0.5"
+          class="w-full py-3 sm:py-4 bg-white border border-gray-300 rounded-lg sm:rounded-xl flex items-center justify-center space-x-2 sm:space-x-3 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer"
         >
           <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -263,8 +263,86 @@ const handleSubmit = async () => {
     }
 }
 
-const handleGoogleSignIn = () => {
-  console.log('Google sign in clicked')
-  // TODO: Add Google OAuth logic here
+  const handleGoogleSignIn = async () => {
+    try {
+      const popup = window.open(
+        '/api/auth/google?select_account=true&flow=signup',
+        'googleAuth',
+        'width=600,height=700,scrollbars=yes,resizable=yes,status=yes,toolbar=no,menubar=no,location=no'
+      )
+    
+    if (!popup) {
+      toast.info('Opening Google Sign-In in new tab...', {
+        animation: 'slideDown',
+        duration: 3000
+      })
+        window.open('/api/auth/google?select_account=true&flow=signup', '_blank')
+      return
+    }
+    
+    setTimeout(() => {
+      if (popup.closed) {
+        toast.error('Popup was closed unexpectedly. Please try again.', {
+          animation: 'slideDown',
+          duration: 5000
+        })
+        return
+      }
+    }, 1000)
+    
+    // Listen for messages from popup
+    const messageHandler = (event: MessageEvent) => {
+      if (event.data?.type === 'GOOGLE_AUTH_SUCCESS') {
+        // Clear the interval since we got the success message
+        clearInterval(checkClosed)
+        window.removeEventListener('message', messageHandler)
+        
+        // Update auth state and show success
+        authStore.setUser(event.data.user)
+        authStore.isAuthenticated = true
+        
+        const successMessage = event.data.isNewUser 
+          ? 'Successfully signed up with Google!' 
+          : 'Successfully signed in with Google!'
+        
+        toast.success(successMessage, {
+          animation: 'slideDown',
+          duration: 3000
+        })
+        
+        // Redirect to home
+        navigateTo('/home')
+      }
+    }
+    
+    window.addEventListener('message', messageHandler)
+    
+    // Fallback: Listen for popup completion (in case message doesn't work)
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkClosed)
+        window.removeEventListener('message', messageHandler)
+        
+        // Check if user is now authenticated
+        setTimeout(async () => {
+          await authStore.checkAuthStatus()
+          if (authStore.isAuthenticated) {
+            toast.success('Successfully signed up with Google!', {
+              animation: 'slideDown',
+              duration: 3000
+            })
+            await navigateTo('/home')
+          }
+        }, 1000)
+      }
+    }, 1000)
+    
+  } catch (error) {
+    console.error('💥 Google Sign-In error:', error)
+    toast.error('Google Sign-In failed. Please try again.', {
+      animation: 'slideDown',
+      duration: 5000
+    })
+  }
 }
 </script>
