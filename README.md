@@ -35,3 +35,6 @@ It is a messaging application dedicated for instant chating, scheduled messages 
        │                   │ 9. Allow Access   │
        │ 10. Response      │                   │
        │◄──────────────────┤                   │
+
+# future planning
+1. translate voice messaging to text

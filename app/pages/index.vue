@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import { useHead, navigateTo } from 'nuxt/app'
 import { useAuthStore } from '../stores/auth'
-import SignupForm from '../components/sign-up/SignupForm.vue'
+import SigninForm from '../components/sign-in/SIgninForm.vue'
 
 const authStore = useAuthStore()
 
@@ -20,7 +20,7 @@ onMounted(async () => {
 
 <template>
     <div v-if="!authStore.isAuthenticated">
-        <SignupForm />
+        <SigninForm />
     </div>
     <div v-else class="min-h-screen bg-black flex items-center justify-center">
         <div class="text-white text-center">

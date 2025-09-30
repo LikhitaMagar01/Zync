@@ -1,9 +1,11 @@
 import { useRuntimeConfig } from 'nuxt/app'
+import { Logger } from '../../../server/utils/logger'
 
 export const getApiBaseUrl = () => {
-  // For client-side
+  // For client-side - use the same host as the current page
   if (typeof window !== 'undefined') {
-    return 'http://192.168.254.228:3000'
+    const currentHost = window.location.host
+    return `http://${currentHost}`
   }
   
   // For server-side
@@ -51,37 +53,85 @@ export const apiCall = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> => {
+  const startTime = Date.now()
+  
   try {
     const baseUrl = getApiBaseUrl()
     const fullUrl = `${baseUrl}${endpoint}`
     
+    // Log API request
+    Logger.apiRequest(options.method || 'GET', endpoint, {
+      url: fullUrl,
+      headers: options.headers
+    })
+    
     const response = await fetch(fullUrl, createFetchOptions(options))
     const data = await response.json()
+    
+    const duration = Date.now() - startTime
+    
+    // Log API response
+    Logger.apiResponse(options.method || 'GET', endpoint, response.status, duration)
 
     if (!response.ok) {
       if (response.status === 401) {
-        console.warn('Received 401 Unauthorized. Attempting token refresh...')
+        Logger.authEvent('api_401_unauthorized', { 
+          endpoint,
+          method: options.method || 'GET',
+          url: fullUrl
+        })
         
         try {
           const refreshResponse = await fetch(`${baseUrl}/api/refresh`, createFetchOptions({
             method: 'POST',
           }))
           
-          if (refreshResponse.ok) {            
+          Logger.authEvent('refresh_token_attempt', { 
+            endpoint,
+            refreshStatus: refreshResponse.status
+          })
+          
+          if (refreshResponse.ok) {
+            Logger.authEvent('refresh_token_success', { 
+              endpoint,
+              message: 'Retrying original request'
+            })
+            
             const retryResponse = await fetch(fullUrl, createFetchOptions(options))
             
             if (retryResponse.ok) {
               const retryData = await retryResponse.json()
+              Logger.authEvent('api_retry_success', { 
+                endpoint,
+                method: options.method || 'GET',
+                statusCode: retryResponse.status
+              })
+              
               return {
                 success: true,
                 data: retryData as T,
                 message: retryData.message || 'Success'
               }
+            } else {
+              Logger.authError('api_retry_failed', { 
+                endpoint,
+                method: options.method || 'GET',
+                statusCode: retryResponse.status
+              })
             }
+          } else {
+            const refreshData = await refreshResponse.json().catch(() => ({}))
+            Logger.authError('refresh_token_failed', { 
+              endpoint,
+              statusCode: refreshResponse.status,
+              error: refreshData.message || refreshData
+            })
           }
-          console.log('❌ Token refresh failed, returning 401 error')
         } catch (refreshError) {
-          console.error('💥 Token refresh error:', refreshError)
+          Logger.authError('refresh_token_error', { 
+            endpoint,
+            error: refreshError.message || refreshError
+          })
         }
       }
       
@@ -99,7 +149,13 @@ export const apiCall = async <T>(
       message: data.message || 'Success'
     }
   } catch (error: any) {
-    console.error('API call failed:', error)
+    Logger.error('API call failed', { 
+      endpoint,
+      method: options.method || 'GET',
+      error: error.message || error,
+      stack: error.stack
+    })
+    
     return {
       success: false,
       message: error.message || 'Network error occurred',
