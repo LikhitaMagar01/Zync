@@ -1,6 +1,5 @@
-// composables/useClientLogger.ts
 export const useClientLogger = () => {
-  const isClient = process.client
+  const isClient = typeof window !== 'undefined'
   const isDev = process.env.NODE_ENV === 'development'
 
   const log = (level: string, message: string, data?: any) => {
