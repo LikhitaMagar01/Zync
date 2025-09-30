@@ -1,6 +1,7 @@
 import { useRuntimeConfig } from 'nuxt/app'
-import { Logger } from '../../../server/utils/logger'
+import { useClientLogger } from '../../composables/useClientLogger'
 
+const Logger = useClientLogger()
 export const getApiBaseUrl = () => {
   // For client-side - use the same host as the current page
   if (typeof window !== 'undefined') {

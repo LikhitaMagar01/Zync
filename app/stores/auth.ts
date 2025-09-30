@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { AuthApiService, type LoginRequest, type LoginResponse } from '../services/api'
-import { Logger } from '../../server/utils/logger'
+import { useClientLogger } from '../composables/useClientLogger'
+
+const Logger = useClientLogger()
 
 export interface User {
   id: string
