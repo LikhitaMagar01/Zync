@@ -175,14 +175,16 @@
           password: ''
         })
         errors.value = {}
-        authStore.clearError()        
-        await authStore.refreshAuthState()
+        authStore.clearError()
         
         toast.success('Welcome back! Sign in successful.', {
           animation: 'slideDown',
           duration: 3000
         })
-        await navigateTo('/home')
+        
+        setTimeout(async () => {
+          await navigateTo('/home')
+        }, 100)
       } else {
         toast.error(result.message || 'Sign in failed. Please check your credentials.', {
           animation: 'slideDown',

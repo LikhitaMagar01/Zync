@@ -1,4 +1,5 @@
 import { verifyAccessToken } from '../../server/utils/auth'
+import { Logger } from '../../server/utils/logger'
 
 declare const getCookie: (event: any, name: string) => string | undefined
 declare const createError: (options: any) => any
@@ -7,6 +8,11 @@ export function authenticateUser(event: any) {
   const accessToken = getCookie(event, 'access_token')
   
   if (!accessToken) {
+    Logger.authError('middleware_no_access_token', { 
+      path: event.path,
+      userAgent: event.headers['user-agent'],
+      ip: event.headers['x-forwarded-for'] || event.headers['x-real-ip'] || 'unknown'
+    })
     throw createError({
       statusCode: 401,
       statusMessage: 'Access token required'
@@ -16,11 +22,21 @@ export function authenticateUser(event: any) {
   const tokenPayload = verifyAccessToken(accessToken)
   
   if (!tokenPayload || tokenPayload.type !== 'access') {
+    Logger.authError('middleware_invalid_access_token', { 
+      path: event.path,
+      hasPayload: !!tokenPayload,
+      tokenType: tokenPayload?.type
+    })
     throw createError({
       statusCode: 401,
       statusMessage: 'Invalid access token'
     })
   }
+
+  Logger.authEvent('middleware_auth_success', { 
+    userId: tokenPayload.userId,
+    path: event.path
+  })
 
   return tokenPayload
 }
