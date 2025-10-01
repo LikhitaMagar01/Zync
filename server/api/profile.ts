@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-  } catch (error) {
+  } catch (error: any) {
     if (error.statusCode) {
       throw error
     }

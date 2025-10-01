@@ -48,7 +48,10 @@ export default defineEventHandler(async (event) => {
     '/api/login', 
     '/api/register', 
     '/api/refresh',
-    '/api/logout'
+    '/api/logout',
+    '/api/auth/google',
+    '/api/auth/google/callback',
+    '/api/auth/google/status'
   ]
   
   // Skip auth for static files and non-API routes

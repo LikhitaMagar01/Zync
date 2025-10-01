@@ -3,16 +3,16 @@ import { useRuntimeConfig } from 'nuxt/app'
 export const getApiBaseUrl = () => {
   // For client-side
   if (typeof window !== 'undefined') {
-    return 'http://localhost:3000'
+    return 'http://192.168.254.228:3000'
   }
   
   // For server-side
   if (typeof useRuntimeConfig !== 'undefined') {
     const config = useRuntimeConfig()
-    return config.public.apiBaseUrl || 'http://localhost:3000'
+    return config.public.apiBaseUrl || 'http://localhost:3000' || 'http://192.168.254.228:3000'
   }
 
-  return process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'
+  return process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:3000' || 'http://192.168.254.228:3000'
 }
 
 export interface ApiResponse<T = any> {
