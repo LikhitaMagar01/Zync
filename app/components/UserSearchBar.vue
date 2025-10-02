@@ -1,78 +1,83 @@
 <template>
   <div class="relative">
-    <div class="flex items-center space-x-3">
-      <div class="flex-1 relative">
-        <input
-          v-model="searchQuery"
-          type="text"
-          :placeholder="placeholder"
-          class="w-full px-6 py-2 pl-10 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-300 shadow-sm text-gray-900 placeholder-gray-500"
-          @input="handleSearch"
-          @focus="onFocus"
-          @blur="onBlur"
-        />
-        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-          <Icon iconName="search" :size="20" svgFill="text-gray-400" class="transition-colors duration-200" />
-        </div>
-        <div class="absolute inset-y-0 right-0 pr-5 flex items-center">
-          <button
-            v-if="searchQuery"
-            @click="clearSearch"
-            class="p-1 rounded-full hover:bg-gray-100 transition-all duration-200 hover:scale-110"
-          >
-            <Icon iconName="close" :size="16" svgFill="text-gray-400 hover:text-gray-600" />
-          </button>
-        </div>
+    <div class="relative">
+      <input
+        v-model="searchQuery"
+        type="text"
+        :placeholder="placeholder"
+        class="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        @input="handleSearch"
+        @focus="onFocus"
+        @blur="onBlur"
+      />
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+      <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+        <button
+          v-if="searchQuery"
+          @click="clearSearch"
+          class="p-1 rounded-full hover:bg-gray-700 transition-colors"
+        >
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
       </div>
     </div>
+    
+    <!-- Search Results Dropdown -->
     <div
-      v-if="showResults"
-      class="absolute z-50 w-full mt-3 bg-white/95 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-2xl max-h-80 overflow-hidden"
+      v-if="showResults || searchResults.length > 0"
+      class="absolute z-50 w-full mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl max-h-80 overflow-hidden"
     >
-      <div v-if="isLoading" class="p-6 text-center">
+      <div v-if="isLoading" class="p-4 text-center">
         <div class="flex items-center justify-center space-x-3">
-          <div class="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
-          <p class="text-sm text-gray-600 font-medium">Searching...</p>
+          <div class="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
+          <p class="text-sm text-gray-400 font-medium">Searching...</p>
         </div>
       </div>
       
-      <div v-else-if="searchResults.length === 0" class="p-6 text-center">
-        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-          <Icon iconName="document" :size="24" svgFill="text-gray-400" />
+      <div v-else-if="searchResults.length === 0" class="p-4 text-center">
+        <div class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
         </div>
-        <p class="text-sm text-gray-500 font-medium">No users found</p>
-        <p class="text-xs text-gray-400 mt-1">Try a different search term</p>
+        <p class="text-sm text-gray-400 font-medium">No users found</p>
+        <p class="text-xs text-gray-500 mt-1">Try a different search term</p>
       </div>
       
       <div v-else class="max-h-72 overflow-y-auto">
         <div
           v-for="(user, index) in searchResults"
           :key="user._id"
-          @click="selectUser(user)"
-          class="flex items-center space-x-4 p-4 hover:bg-gray-50/80 cursor-pointer transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/50 border-b border-gray-100/50 last:border-b-0"
-          :class="{ 'bg-blue-50/30': index === 0 }"
+          @click.stop="selectUser(user)"
+          class="flex items-center space-x-3 p-3 hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-700 last:border-b-0"
+          :class="{ 'bg-gray-700': index === 0 }"
         >
-          <!-- Avatar with gradient background -->
-          <div class="relative">
-            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-semibold shadow-sm">
-              {{ getUserInitials(user) }}
-            </div>
-            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+          <!-- Avatar -->
+          <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+            {{ getUserInitials(user) }}
           </div>
           
           <!-- User Info -->
           <div class="flex-1 min-w-0">
-            <p class="font-semibold text-gray-900 truncate">
+            <p class="font-medium text-white truncate">
               {{ getUserDisplayName(user) }}
             </p>
-            <p class="text-sm text-gray-500 truncate">{{ user.username }}</p>
-            <p v-if="user.bio" class="text-xs text-gray-400 truncate mt-1">{{ user.bio }}</p>
+            <p class="text-sm text-gray-400 truncate">{{ user.username }}</p>
+            <p v-if="user.bio" class="text-xs text-gray-500 truncate mt-1">{{ user.bio }}</p>
           </div>
           
           <!-- Action Button -->
           <div class="flex-shrink-0">
-            <button class="w-8 h-8 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-sm">
-              <Icon iconName="add" :size="16" svgFill="text-white" />
+            <button class="w-7 h-7 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center transition-colors">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
             </button>
           </div>
         </div>
@@ -83,7 +88,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import Icon from './core/Icon.vue'
 
 interface Props {
   placeholder?: string
@@ -95,7 +99,7 @@ interface SearchResponse {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  placeholder: 'Search users by username, name, or email...'
+  placeholder: 'Search users...'
 })
 
 const emit = defineEmits<{
@@ -185,17 +189,11 @@ const getUserDisplayName = (user: any) => {
 }
 
 .max-h-72::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
 }
 
 .max-h-72::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-/* Smooth transitions */
-* {
-  transition: all 0.2s ease-in-out;
+  background: rgba(255, 255, 255, 0.2);
 }
 </style>
-
