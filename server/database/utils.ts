@@ -30,6 +30,12 @@ export class DatabaseService {
     return await this.db.collection(COLLECTIONS.USERS).findOne({ _id: new ObjectId(userId) })
   }
 
+  async findUsers(query: any) {
+    return await this.db.collection(COLLECTIONS.USERS)
+      .find({ ...query, isActive: true })
+      .toArray()
+  }
+
   async updateUser(userId: string, updateData: any) {
     return await this.db.collection(COLLECTIONS.USERS).updateOne(
       { _id: userId as any },
