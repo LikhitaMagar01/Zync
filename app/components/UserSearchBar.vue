@@ -65,9 +65,13 @@
           
           <!-- User Info -->
           <div class="flex-1 min-w-0">
-            <p class="font-medium text-white truncate">
-              {{ getUserDisplayName(user) }}
-            </p>
+            <div class="flex items-center gap-2">
+              <p class="font-medium text-white truncate">
+                {{ getUserDisplayName(user) }}
+              </p>
+              <span v-if="user.isOnline" class="w-2 h-2 bg-green-500 rounded-full"></span>
+              <span v-else class="w-2 h-2 bg-gray-500 rounded-full"></span>
+            </div>
             <p class="text-sm text-gray-400 truncate">{{ user.username }}</p>
             <p v-if="user.bio" class="text-xs text-gray-500 truncate mt-1">{{ user.bio }}</p>
           </div>

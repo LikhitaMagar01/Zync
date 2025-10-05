@@ -87,6 +87,10 @@ const handleUserSelected = (user: User) => {
 }
 
 const getUserInitials = (user: User) => {
+  if (!user) {
+    return '?'
+  }
+  
   if (user.firstName && user.lastName) {
     return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
   }
@@ -94,6 +98,10 @@ const getUserInitials = (user: User) => {
 }
 
 const getUserDisplayName = (user: User) => {
+  if (!user) {
+    return 'Unknown User'
+  }
+  
   if (user.firstName && user.lastName) {
     return `${user.firstName} ${user.lastName}`
   }

@@ -11,6 +11,14 @@ export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt'
   ],
+  nitro: {
+    experimental: {
+      wasm: true
+    }
+  },
+  typescript: {
+    typeCheck: false
+  },
   vite: {
     plugins: [
       tailwindcss(),

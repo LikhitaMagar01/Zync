@@ -1,8 +1,7 @@
+import { getActiveConnections } from '../../utils/chatConnections'
 import { getDatabaseService } from '../../database/utils'
 
-declare const defineEventHandler: (handler: (event: any) => any) => any
 declare const useNitroApp: () => { db?: any }
-declare const getQuery: (event: any) => Record<string, any>
 
 export default defineEventHandler(async (event) => {
   try {
@@ -17,34 +16,46 @@ export default defineEventHandler(async (event) => {
       }
     }
 
+    // Get active connections to show online status
+    const activeConnections = getActiveConnections()
+
+    try {
+      // Try to search actual database users
     const db = useNitroApp().db
-    if (!db) {
-      throw new Error('Database connection not available')
-    }
+      if (db) {
+        const dbService = getDatabaseService(db)
+        
+        // Search users in database
+        const users = await dbService.findUsers({
+          $or: [
+            { username: { $regex: searchQuery, $options: 'i' } },
+            { email: { $regex: searchQuery, $options: 'i' } }
+          ],
+          isActive: true
+        })
 
-    const dbService = getDatabaseService(db)
-    
-    const users = await dbService.findUsers({
-      $or: [
-        { username: { $regex: searchQuery, $options: 'i' } },
-        { firstName: { $regex: searchQuery, $options: 'i' } },
-        { lastName: { $regex: searchQuery, $options: 'i' } }
-      ]
-    })
+        // Format users and add online status
+        const formattedUsers = users.map(user => ({
+          _id: user._id.toString(),
+          username: user.username,
+          firstName: user.firstName || user.username,
+          lastName: user.lastName || '',
+          email: user.email,
+          bio: user.bio || `User ${user.username}`,
+          isOnline: activeConnections.some(connId => 
+            connId.includes(user._id.toString()) || 
+            connId.includes(user.username.toLowerCase())
+          )
+        }))
 
-    const filteredUsers = users.map(user => ({
-      _id: user._id,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      avatar: user.avatar,
-      bio: user.bio
-    }))
-
-    return {
-      success: true,
-      data: filteredUsers,
-      count: filteredUsers.length
+        return {
+          success: true,
+          data: formattedUsers,
+          count: formattedUsers.length
+        }
+      }
+    } catch (dbError) {
+      console.log('Database not available, using mock data')
     }
   } catch (error) {
     console.error('Error searching users:', error)
