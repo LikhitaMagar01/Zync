@@ -129,7 +129,7 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-  } catch (error) {
+  } catch (error:any) {
     const duration = Date.now() - startTime
     
     if (error.statusCode) {
